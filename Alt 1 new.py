@@ -1,6 +1,5 @@
 import pandas as pd
 import streamlit as st
-import subprocess
 
 # Your normal Streamlit app code
 st.title("Spotify Track Data")
@@ -29,6 +28,9 @@ sort_option = st.selectbox(
     ['Most Streams', 'Released Year', 'Released Month', 'Released Day', 'BPM', 'Energy %']
 )
 
+# Handle missing values in the 'energy_%' column (if any)
+filtered_data = filtered_data.dropna(subset=['energy_%'])
+
 # Sorting the data based on user input
 if sort_option == 'Most Streams':
     sorted_data = filtered_data.sort_values(by='streams', ascending=False)
@@ -50,18 +52,9 @@ sorted_data['streams'] = sorted_data['streams'].apply(lambda x: f'{x:,}')
 st.write(sorted_data)
 
 # Optional: Display the cover image for the top track
-if not sorted_data['cover_url'].isna().iloc[0]:
+if pd.notna(sorted_data['cover_url'].iloc[0]):
     st.image(sorted_data['cover_url'].iloc[0])  # Display cover of the top track
 
 # Display the top N tracks (e.g., top 10)
 st.write("Top 10 Tracks:")
 st.write(sorted_data.head(10))
-
-# Launch the Streamlit app using subprocess if needed
-process = subprocess.Popen([
-    "streamlit", "run", __file__,  # Run the current file (Alt 1.py)
-    "--server.port", "8543",  # Set a specific port if 8501 is occupied
-    "--server.headless", "true"  # Run in headless mode for background operation
-])
-
-# Note: Streamlit will automatically handle opening the app in the browser
